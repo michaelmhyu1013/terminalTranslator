@@ -6,6 +6,7 @@
 --
 -- FUNCTIONS:
 --                  void translate_from_input(int *pipe, size_t buffer_size)
+--                  void print_translation_pipe(int *pipe, char *output_buffer, char *read_buffer)
 --
 -- DATE:			Jan 18, 2020
 --
@@ -29,5 +30,6 @@
 #include "codes.h"
 
 void translate_from_input(int *pipe, size_t buffer_size);
+void print_translation_pipe(int *pipe, char *output_buffer, char *read_buffer);
 
 #endif

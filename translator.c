@@ -1,3 +1,36 @@
+/*------------------------------------------------------------------------------------------------------------------
+-- SOURCE FILE: translator.c - 
+--
+-- PROGRAM: translator
+--
+-- FUNCTIONS:
+--
+--              int main(void)
+--              void fatal(char *s)
+--              void clear_character_buffer(char *buf, size_t buffer_size)
+--
+-- DATE: January 16
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Michael Yu
+--
+-- PROGRAMMER: Michael Yu
+--
+-- NOTES:
+-- The program will monitor a directory that is specified in a configuration file for any type of file
+-- modification activity (creation, read/write, deletion). The design uses the “inotify” kernel-level
+-- utility to obtain the file system event notification. The “select” system call is used to monitor
+-- the watch descriptor (returned from inotify).
+--
+-- Once select is triggered, the directory under watch is processed to determine the exact type of
+-- file activity. Once the created/modified files have been identified, they are moved to a separate
+-- archive directory. Before the archival process takes place, the system process table (/proc) is
+-- searched to verify that the modifying process is currently active and running.
+--
+-- Note that the application once invoked, will continue to execute as a daemon.
+----------------------------------------------------------------------------------------------------------------------*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,11 +41,30 @@
 
 #include "translator.h"
 
-//stty sane [ctrl+j]                    - command line command to restore keyboard
-//kill(0,9) is for abnormal termination
-//killpid(pid) is for normal termination
 int is_terminate = 0;
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: write_to_translate_pipe
+--
+-- DATE: January 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Michael Yu
+--
+-- PROGRAMMER: Michael Yu
+--
+-- INTERFACE: void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
+--
+--
+--
+--
+--
+-- RETURNS: void.
+--
+-- NOTES:
+-- 
+----------------------------------------------------------------------------------------------------------------------*/
 int main(void)
 {
     system("/bin/stty raw igncr -echo");
@@ -104,12 +156,57 @@ int main(void)
     return 0;
 }
 
+
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: write_to_translate_pipe
+--
+-- DATE: January 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Michael Yu
+--
+-- PROGRAMMER: Michael Yu
+--
+-- INTERFACE: void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
+--
+--
+--
+--
+--
+-- RETURNS: void.
+--
+-- NOTES:
+-- 
+----------------------------------------------------------------------------------------------------------------------*/
 void fatal(char *s)
 {
     perror(s);
     exit(1);
 }
 
+/*------------------------------------------------------------------------------------------------------------------
+-- FUNCTION: write_to_translate_pipe
+--
+-- DATE: January 17, 2020
+--
+-- REVISIONS: N/A
+--
+-- DESIGNER: Michael Yu
+--
+-- PROGRAMMER: Michael Yu
+--
+-- INTERFACE: void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
+--
+--
+--
+--
+--
+-- RETURNS: void.
+--
+-- NOTES:
+-- 
+----------------------------------------------------------------------------------------------------------------------*/
 void clear_character_buffer(char *buf, size_t buffer_size)
 {
     memset(buf, '\0', buffer_size * sizeof(buf[0]));
