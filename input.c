@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------------------------------------------
--- SOURCE FILE: input.c - 
+-- SOURCE FILE: input.c
 --
 -- PROGRAM: translator
 --
@@ -17,17 +17,9 @@
 -- PROGRAMMER: Michael Yu
 --
 -- NOTES:
--- The program will monitor a directory that is specified in a configuration file for any type of file
--- modification activity (creation, read/write, deletion). The design uses the “inotify” kernel-level
--- utility to obtain the file system event notification. The “select” system call is used to monitor
--- the watch descriptor (returned from inotify).
---
--- Once select is triggered, the directory under watch is processed to determine the exact type of
--- file activity. Once the created/modified files have been identified, they are moved to a separate
--- archive directory. Before the archival process takes place, the system process table (/proc) is
--- searched to verify that the modifying process is currently active and running.
---
--- Note that the application once invoked, will continue to execute as a daemon.
+--          This file contains all the functions that are related with the retrieval of user input data. It provides 
+--          functionality to read from standard input and handles certain special cases prior to writing to the output
+--           and translation pipes.
 ----------------------------------------------------------------------------------------------------------------------*/
 
 #include <stdio.h>
@@ -52,13 +44,16 @@
 --
 -- INTERFACE: void write_from_input(int *pipe, int *pipe2, size_t buffer_size)
 --
---
---
+--              pipe:           pipe that will be written to for all user input. used for general echo outpput
+--              pipe2:          pipe that will be written to for translation
+--              buffer_size:    represents the buffer size of the two buffers
 --
 -- RETURNS: void.
 --
 -- NOTES:
--- 
+--              Call this function to read from standard input and store the data into the pipes that will be read
+--              by the output and translate processes. The output pipe will capture all characters, whereas the translate
+--              process will store data from the pipe for later processing.
 ----------------------------------------------------------------------------------------------------------------------*/
 void write_from_input(int *pipe, int *pipe2, size_t buffer_size)
 {
@@ -108,14 +103,17 @@ void write_from_input(int *pipe, int *pipe2, size_t buffer_size)
 -- PROGRAMMER: Michael Yu
 --
 -- INTERFACE: void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
---
---
---
---
+--              pipe:           pipe that will be written to
+--              buffer:         buffer that stores the data to be written to the pipe
+--              buffer_size:    size of the buffer that will be read from
+--              counter:        counter that stores the current index of the buffer. used to reset the counter upon
+--                              user input of the enter key 'E'
 --
 -- RETURNS: void.
 --
--- NOTES:
+-- NOTES:           Call this function to write a buffer to the translation pipe. This translation pipe is used by the
+--                  child translate process that will convert user input based on the special guidelines denoted in
+--                  translator.h.
 -- 
 ----------------------------------------------------------------------------------------------------------------------*/
 void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
