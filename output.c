@@ -1,5 +1,6 @@
 
 #include "output.h"
+#include "translator.h"
 
 void print_from_pipe(int *pipe, char *read_buffer)
 {

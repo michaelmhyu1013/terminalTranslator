@@ -1,11 +1,11 @@
 /*------------------------------------------------------------------------------------------------------------------
--- HEADER FILE:		input.h - This file provides all methods related to capturing user input from
---                              the terminal
+-- HEADER FILE:		translat.h - This file provides all related to the translation of an input buffer received from a
+--                               pipe in response to the input of special characters, defined in codes.h.
 --
 -- PROGRAM:			translator
 --
 -- FUNCTIONS:
---                  void printGpsData(struct gps_data_t *gpsdata, bool isGPSDataValid)
+--                  void translate_from_input(int *pipe, size_t buffer_size)
 --
 -- DATE:			Jan 18, 2020
 --
@@ -26,12 +26,7 @@
 
 #include "translator.h"
 #include "output.h"
-
-#define ASCII_BACKSPACE                 0x58 // regular backspace function
-#define ASCII_LINE_KILL                 0x4B // clear everything before the line kill
-#define ASCII_ABNORMAL_TERMINATION      0x0B // no translation and ends program
-#define ASCII_NORMAL_TERMINATION        0x54 // translates and ends program
-#define ASCII_ENTER                     0x46 // translates
+#include "codes.h"
 
 void translate_from_input(int *pipe, size_t buffer_size);
 

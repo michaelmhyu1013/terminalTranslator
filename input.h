@@ -5,9 +5,10 @@
 -- PROGRAM:			translator
 --
 -- FUNCTIONS:
---                  void printGpsData(struct gps_data_t *gpsdata, bool isGPSDataValid)
+--                  void write_from_input(int *pipe, int *pipe2, size_t buffer_size)
+--                  void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
 --
--- DATE:			Jan 18, 2020
+-- DATE:			Jan 22, 2020
 --
 -- REVISIONS:       (N/A)
 --
@@ -19,8 +20,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "translator.h"
-
 void write_from_input(int *pipe, int *pipe2, size_t buffer_size);
+void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter);
 
 #endif

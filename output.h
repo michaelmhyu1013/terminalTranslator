@@ -1,11 +1,10 @@
 /*------------------------------------------------------------------------------------------------------------------
--- HEADER FILE:		input.h - This file provides all methods related to capturing user input from
---                              the terminal
+-- HEADER FILE:		output.h - This file provides all methods related to printing from a pipe to standard output.
 --
 -- PROGRAM:			translator
 --
 -- FUNCTIONS:
---                  void printGpsData(struct gps_data_t *gpsdata, bool isGPSDataValid)
+--                  void print_from_pipe(int *pipe, char *read_buffer)
 --
 -- DATE:			Jan 18, 2020
 --
@@ -23,8 +22,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-
-#include "translator.h"
 
 void print_from_pipe(int *pipe, char *read_buffer);
 

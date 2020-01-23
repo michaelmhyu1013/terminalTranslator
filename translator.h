@@ -1,13 +1,15 @@
 /*------------------------------------------------------------------------------------------------------------------
--- HEADER FILE:		input.h - This file provides all methods related to capturing user input from
+-- HEADER FILE:		translator.h - This file provides all methods related to capturing user input from
 --                              the terminal
 --
 -- PROGRAM:			translator
 --
 -- FUNCTIONS:
---                  void printGpsData(struct gps_data_t *gpsdata, bool isGPSDataValid)
+--                  int main(void)
+--                  void fatal(char *)
+--                  void clear_character_buffer(char *buf, size_t buffer_size)
 --
--- DATE:			Jan 18, 2020
+-- DATE:			Jan 16, 2020
 --
 -- REVISIONS:       (N/A)
 --
@@ -23,10 +25,16 @@
 #include "output.h"
 #include "translate.h"
 
+/*              Defines                      */
 #define TOTAL_PROCESSES 3
 #define BUFFERSIZE 256
 
+/*           Function Prototypes             */
+int main (void);
 void fatal(char *);
 void clear_character_buffer(char *buf, size_t buffer_size);
+
+/*            Globals                         */
+extern int is_terminate;
 
 #endif

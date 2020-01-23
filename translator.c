@@ -11,10 +11,12 @@
 //stty sane [ctrl+j]                    - command line command to restore keyboard
 //kill(0,9) is for abnormal termination
 //killpid(pid) is for normal termination
+int is_terminate = 0;
 
 int main(void)
 {
     system("/bin/stty raw igncr -echo");
+
     char read_buffer[BUFFERSIZE];
     int input_pipe[2], translate_output_pipe[2];
     pid_t translate_pid, output_pid;
@@ -28,65 +30,83 @@ int main(void)
         fatal("Parent pipe call fail");
     }
 
-    /* ------- translate process creates pipe to communicate with output process ----- */
+    /* ------- Open the translate pipe ----- */
     if (pipe(translate_output_pipe) < 0)
     {
         fatal("translate-output pipe call fail");
     }
 
-    /*-------- fork the translate process ---------------*/
+    /*-------- parent fork the translate process ---------------*/
     if ((translate_pid = fork()) < 0)
     {
         fatal("translate fork fail");
     }
 
-    /*------- parent forks the output process -------*/
+    /*------- PARENT BLOCK -------*/
     if (translate_pid > 0)
     {
-        /*-------- fork the translate process ---------------*/
+        /*-------- parent forks the translate process ---------------*/
         if ((output_pid = fork()) < 0)
         {
             fatal("fork translate call");
         }
-        /*------- parent input process execution -------*/
+        /*------- parent main execution: read from stdin -------*/
         if (output_pid > 0)
         {
             close(translate_output_pipe[0]);
             close(input_pipe[0]);
-            write_from_input(input_pipe, translate_output_pipe, BUFFERSIZE);
+
+            /* loops until termination */
+            while (!is_terminate)
+            {
+                write_from_input(input_pipe, translate_output_pipe, BUFFERSIZE);
+            }
+
+            /* Lines after execute only on normal termination */
+
+            waitpid(translate_pid, NULL, 0);
+
+            close(translate_output_pipe[1]);
+            close(input_pipe[1]);
+
+            kill(translate_pid, SIGKILL);
+            kill(output_pid, SIGKILL);
+
+            system("/bin/stty cooked -igncr echo");
         }
-        /* ------- output process execution ------- */
+
+        /* ------- OUTPUT BLOCK------- */
         if (output_pid == 0)
         {
             close(input_pipe[1]);
             close(translate_output_pipe[1]);
 
-            for (;;)
+            while (!is_terminate)
             {
                 print_from_pipe(input_pipe, read_buffer);
             }
+            printf("output exit");
+            exit(0);
         }
     }
-    /*-------- translate process execution ------*/
+
+    /*-------- TRANSLATE BLOCK ------*/
     if (translate_pid == 0)
     {
-        printf("translate process\n");
         close(input_pipe[1]);
 
-        for (;;)
+        while (!is_terminate)
         {
             translate_from_input(translate_output_pipe, BUFFERSIZE);
         }
+        exit(0);
     }
-
-    printf("Completion of main\n");
-    // system("/bin/stty cooked echo");
     return 0;
 }
 
 void fatal(char *s)
 {
-    perror(s); /* print error msg and die */
+    perror(s);
     exit(1);
 }
 
