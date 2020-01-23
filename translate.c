@@ -1,11 +1,12 @@
 /*------------------------------------------------------------------------------------------------------------------
--- SOURCE FILE: input.c - 
+-- SOURCE FILE: translate.c
 --
 -- PROGRAM: translator
 --
 -- FUNCTIONS:
 --
 --          void translate_from_input(int *pipe, size_t buffer_size)
+--          void print_translation_pipe(int *pipe, char *output_buffer, char *read_buffer)
 --
 -- DATE: January 16
 --
@@ -16,23 +17,14 @@
 -- PROGRAMMER: Michael Yu
 --
 -- NOTES:
--- The program will monitor a directory that is specified in a configuration file for any type of file
--- modification activity (creation, read/write, deletion). The design uses the “inotify” kernel-level
--- utility to obtain the file system event notification. The “select” system call is used to monitor
--- the watch descriptor (returned from inotify).
---
--- Once select is triggered, the directory under watch is processed to determine the exact type of
--- file activity. Once the created/modified files have been identified, they are moved to a separate
--- archive directory. Before the archival process takes place, the system process table (/proc) is
--- searched to verify that the modifying process is currently active and running.
---
--- Note that the application once invoked, will continue to execute as a daemon.
+--          This file contains all functionality related to the translation of the characters inputed by the user. Note that
+--          translation of input only occurs when two characters are detected by the input: 'E' or 'T'.
 ----------------------------------------------------------------------------------------------------------------------*/
 
 #include "translate.h"
 
 /*------------------------------------------------------------------------------------------------------------------
--- FUNCTION: write_to_translate_pipe
+-- FUNCTION: translate_from_input
 --
 -- DATE: January 17, 2020
 --
@@ -42,15 +34,16 @@
 --
 -- PROGRAMMER: Michael Yu
 --
--- INTERFACE: void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
+-- INTERFACE: translate_from_input(int *pipe, size_t buffer_size)
 --
---
---
---
+--              pipe:               pipe that will be read for data
+--              buffer_size:        maximum buffer size that will be read from the pipe
 --
 -- RETURNS: void.
 --
--- NOTES:
+-- NOTES:   This function reads data from user input and stores it into a temporary buffer. The buffer is then
+--          iterated over to translate all characters within the buffer as defined by the guidelines in 
+--          translator.h.
 -- 
 ----------------------------------------------------------------------------------------------------------------------*/
 void translate_from_input(int *pipe, size_t buffer_size)
@@ -106,7 +99,7 @@ void translate_from_input(int *pipe, size_t buffer_size)
 }
 
 /*------------------------------------------------------------------------------------------------------------------
--- FUNCTION: write_to_translate_pipe
+-- FUNCTION: print_translation_pipe
 --
 -- DATE: January 17, 2020
 --
@@ -116,15 +109,17 @@ void translate_from_input(int *pipe, size_t buffer_size)
 --
 -- PROGRAMMER: Michael Yu
 --
--- INTERFACE: void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
+-- INTERFACE: void print_translation_pipe(int *pipe, char *output_buffer, char *read_buffer)
 --
---
---
+--              pipe:           pipe that will be read and printed to the console with proper formatting
+--              output_buffer:  buffer that will be used to store the data read from the pipe
+--              read_buffer:    buffer that was read into pipe and will be cleared
 --
 --
 -- RETURNS: void.
 --
--- NOTES:
+-- NOTES:   Call this function to format and print the data stored in the translation pipe to the console. This is done
+--          by piping the data to the write descriptor of the translation pipe. 
 -- 
 ----------------------------------------------------------------------------------------------------------------------*/
 void print_translation_pipe(int *pipe, char *output_buffer, char *read_buffer)
