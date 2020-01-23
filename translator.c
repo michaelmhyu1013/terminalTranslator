@@ -1,5 +1,7 @@
 /*------------------------------------------------------------------------------------------------------------------
--- SOURCE FILE: translator.c - 
+-- SOURCE FILE: translator.c - An application that reads user input from the terminal and echoes back the contents
+--                              to the terminal window. It allows the user to translate the input following a certain
+--                              set of rules for special characters.
 --
 -- PROGRAM: translator
 --
@@ -18,17 +20,28 @@
 -- PROGRAMMER: Michael Yu
 --
 -- NOTES:
--- The program will monitor a directory that is specified in a configuration file for any type of file
--- modification activity (creation, read/write, deletion). The design uses the “inotify” kernel-level
--- utility to obtain the file system event notification. The “select” system call is used to monitor
--- the watch descriptor (returned from inotify).
+-- This program constantly monitors user input from the terminal and echoes the exact input back to the console. All 
+-- built-in keyboard commands are disabled using the command:
 --
--- Once select is triggered, the directory under watch is processed to determine the exact type of
--- file activity. Once the created/modified files have been identified, they are moved to a separate
--- archive directory. Before the archival process takes place, the system process table (/proc) is
--- searched to verify that the modifying process is currently active and running.
+--                  system("/bin/stty raw igncr -echo")
 --
--- Note that the application once invoked, will continue to execute as a daemon.
+-- Special characters are handled differently following a certain set of guidelines, listed below:
+--                  'E'     - command to perform translation of user input based on following special characters
+--                  'a'     - character will be converted to 'z' upon translation
+--                  'X'     - character that will represent the BACKSPACE key upon translation
+--                  'K'     - character that will represent the LINE-KILL key upon translation
+--                  'T'     - character that will represent NORMAL TERMINATION of the program. The user input will be
+--                              translated prior to termination
+--                  'CTRL+k' - character that will represent ABNORMAL TERMINATION of the program. Application will
+--                              immediately exit and no echo or translation of user text will occur 
+--
+-- The application utilizies a simple fan architecture in constructing the three processes. The parent process is responsible
+-- for handling user input, and the two child processes are responsible for translation and terminal output. Upon any 
+-- error that occurs from reading or writing from the pipe, the program will automatically terminate and notify the user of
+-- the error that occured.
+--
+-- The application utilizes two pipes, one for transferring data from standard input to the output process. The second pipe
+-- is used to transfer translated data from the translation process to the output process.
 ----------------------------------------------------------------------------------------------------------------------*/
 
 #include <stdio.h>
@@ -44,7 +57,7 @@
 int is_terminate = 0;
 
 /*------------------------------------------------------------------------------------------------------------------
--- FUNCTION: write_to_translate_pipe
+-- FUNCTION: main
 --
 -- DATE: January 17, 2020
 --
@@ -54,15 +67,15 @@ int is_terminate = 0;
 --
 -- PROGRAMMER: Michael Yu
 --
--- INTERFACE: void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
+-- INTERFACE: int main(void)
 --
+-- RETURNS: int
+--              0 upon successful termination of the program
 --
---
---
---
--- RETURNS: void.
---
--- NOTES:
+-- NOTES:   Acts as the driver of the program and is responsible for the creation of the processes and pipes that will
+--          be used in the program. Upon any unsuccessful pipe or fork call, the application will exit. All processes
+--          are controlled by a boolean value that will only be toggled upon normal termination ('T'). The 'T' will
+--          be piped appropriately to all processes to successfully terminate the loops in each process.
 -- 
 ----------------------------------------------------------------------------------------------------------------------*/
 int main(void)
@@ -158,7 +171,7 @@ int main(void)
 
 
 /*------------------------------------------------------------------------------------------------------------------
--- FUNCTION: write_to_translate_pipe
+-- FUNCTION: fatal
 --
 -- DATE: January 17, 2020
 --
@@ -168,16 +181,13 @@ int main(void)
 --
 -- PROGRAMMER: Michael Yu
 --
--- INTERFACE: void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
---
---
---
---
+-- INTERFACE: void fatal(char *s)
+--              s: represents the string that will be printed upon a failed read or write function
 --
 -- RETURNS: void.
 --
--- NOTES:
--- 
+-- NOTES:   General utility function for logging errors related to read or write functions for pipes.    
+--
 ----------------------------------------------------------------------------------------------------------------------*/
 void fatal(char *s)
 {
@@ -186,7 +196,7 @@ void fatal(char *s)
 }
 
 /*------------------------------------------------------------------------------------------------------------------
--- FUNCTION: write_to_translate_pipe
+-- FUNCTION: clear_character_buffer
 --
 -- DATE: January 17, 2020
 --
@@ -196,16 +206,15 @@ void fatal(char *s)
 --
 -- PROGRAMMER: Michael Yu
 --
--- INTERFACE: void write_to_translate_pipe(int *pipe, char *buffer, size_t buffer_size, int *counter)
---
---
---
---
+-- INTERFACE: void clear_character_buffer(char *buf, size_t buffer_size)
+--              buf:            the buffer that will be memset and have all its values set to null character
+--              buffer_size:    represents the size of the buffer tht will be memset
 --
 -- RETURNS: void.
 --
--- NOTES:
--- 
+-- NOTES:   General utility function that will null out all values for a character buffer. Used to flush a buffer
+--          after using it in a read or write from a pipe.
+--      
 ----------------------------------------------------------------------------------------------------------------------*/
 void clear_character_buffer(char *buf, size_t buffer_size)
 {
