@@ -13,11 +13,12 @@ void write_from_input(int *pipe, int *pipe2, size_t buffer_size)
     int c;
     int counter = 0;
     clear_character_buffer(buffer_to_translate, BUFFERSIZE);
-    
+
     while ((c = getchar()) && !is_terminate)
     {
-        if (c == ASCII_SPACE || c == ASCII_BACKSPACE ) {
-            break;
+        if (c == ASCII_SPACE || c == ASCII_BACKSPACE || c == ASCII_DEL)
+        {
+            continue;
         }
         if (write(pipe[1], &c, buffer_size) < 0)
         {

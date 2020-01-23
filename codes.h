@@ -18,7 +18,8 @@
 #ifndef CODES_H
 #define CODES_H
 
-#define ASCII_BACKSPACE                 0x7F // regular backspace function
+#define ASCII_DEL                 0x7F // regular backspace function
+#define ASCII_BACKSPACE                 0x08 // regular backspace function
 #define ASCII_SPACE                     0x20 // regular backspace function
 #define ASCII_LINE_KILL                 0x4B // clear everything before the line kill
 #define ASCII_ABNORMAL_TERMINATION      0x0B // no translation and ends program
